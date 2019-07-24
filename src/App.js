@@ -3,8 +3,11 @@ import './App.css';
 import Button from './Components/Button';
 import Display from './Components/Display';
 
-const isOperator = /[*/+‑%]/,
-  endsWithOperator = /[*+‑/%]$/;
+const isOperator = /[*/+%-]/,
+  endsWithOperator = /[*+/%-]$/,
+  endsWithNum = /[0123456789]$/,
+  endsWithSubtract = /[-]$/,
+  endsWithDecimal = /['.']$/;
 
 class App extends React.Component {
   constructor(props) {
@@ -12,69 +15,115 @@ class App extends React.Component {
     this.state = {
       currentVal: '0',
       formula: '',
-      lastClicked: ''
+      evaluated: ''
     };
     this.initialize = this.initialize.bind(this);
     this.handleNumber = this.handleNumber.bind(this);
     this.handleOperators = this.handleOperators.bind(this);
     this.handleEvaluate = this.handleEvaluate.bind(this);
+    this.handleDecimal = this.handleDecimal.bind(this);
+    this.handleNegative = this.handleNegative.bind(this);
   }
 
   initialize() {
     this.setState({
       currentVal: '0',
-      formula: '',
-      lastClicked: ''
+      preExpression: '',
+      evaluated: ''
     });
   }
-
+  // numbers
   handleNumber(e) {
-    if (
-      this.state.currentVal == '0'
-      // isOperator.test(this.state.currentVal)
-    ) {
+    if (this.state.currentVal == '0' || this.state.evaluated === true) {
       this.setState({
-        currentVal: e.target.value
+        currentVal: e.target.value,
+        evaluated: false
       });
     } else if (
       this.state.currentVal.length < 14 &&
       this.state.currentVal !== 0
     ) {
-      this.setState({ currentVal: this.state.currentVal + e.target.value });
+      this.setState({
+        currentVal: this.state.currentVal + e.target.value,
+        evaluated: false
+      });
     }
   }
   // Operator
 
   handleOperators(e) {
-    // if (!isOperator.test(this.state.currentVal)) {
-    //   this.setState({
-    //     currentVal: this.state.currentVal + e.target.value
-    //   });
-    // } else
     if (endsWithOperator.test(this.state.currentVal)) {
       this.setState({
         currentVal: this.state.currentVal.slice(0, -1) + e.target.value
       });
-    } else if (this.state.currentVal.length < 14) {
+    } else if (this.state.currentVal == '0' && e.target.value.includes('-')) {
       this.setState({
-        currentVal: this.state.currentVal + e.target.value
+        currentVal: e.target.value
+      });
+    } else {
+      this.setState({
+        currentVal: this.state.currentVal + e.target.value,
+        evaluated: false
       });
     }
-    // else
-    // {
-    //   let answer =
-    //     Math.round(1000000000000 * eval(this.state.currentVal)) / 1000000000000;
-    //   this.setState({
-    //     currentVal: answer
-    //   });
-    // }
   }
   handleEvaluate() {
-    if (endsWithOperator.test(this.state.currentVal)) {
-      this.setState({ formula: this.state.currentVal.slice(0, -1) });
-      let answer =
-        Math.round(1000000000000 * eval(this.state.currentVal)) / 1000000000000;
-      this.setState({ currentVal: answer });
+    let formula = this.state.currentVal;
+    if (endsWithOperator.test(formula)) {
+      formula = formula.slice(0, -1);
+      let answer = Math.round(1000000000000 * eval(formula)) / 1000000000000;
+      this.setState({ currentVal: answer, evaluated: true });
+    } else {
+      let answer = Math.round(1000000000000 * eval(formula)) / 1000000000000;
+      this.setState({ currentVal: answer, evaluated: true });
+    }
+  }
+  // Negative
+
+  handleNegative(e) {
+    if (
+      endsWithOperator.test(this.state.currentVal) &&
+      !endsWithSubtract.test(this.state.currentVal)
+    ) {
+      this.setState({ currentVal: this.state.currentVal + e.target.value });
+    } else if (
+      endsWithDecimal.test(this.state.currentVal) ||
+      endsWithNum.test(this.state.currentVal)
+    ) {
+      this.setState({ currentVal: this.state.currentVal * -1 });
+    }
+  }
+
+  handleDecimal() {
+    if (this.state.evaluated === true || this.state.currentVal == '0') {
+      this.setState({ currentVal: '0.', evaluated: false });
+    } else if (
+      !this.state.currentVal.includes('.') &&
+      endsWithNum.test(this.state.currentVal) &&
+      !endsWithDecimal.test(this.state.currentVal)
+    ) {
+      this.setState({
+        currentVal: this.state.currentVal + '.',
+        evaluated: false
+      });
+    } else if (
+      endsWithOperator.test(this.state.currentVal) &&
+      this.state.currentVal.includes('.') &&
+      !endsWithDecimal.test(this.state.currentVal)
+    ) {
+      this.setState({
+        currentVal: this.state.currentVal + '0.',
+        evaluated: false
+      });
+    } else if (
+      isOperator.test(this.state.currentVal) &&
+      this.state.currentVal.includes('.') &&
+      endsWithNum.test(this.state.currentVal)
+    ) {
+      this.setState({
+        currentVal: this.state.currentVal + '.',
+        evaluated: false
+      });
     }
   }
 
@@ -89,6 +138,7 @@ class App extends React.Component {
             operators={this.handleOperators}
             decimal={this.handleDecimal}
             evaluate={this.handleEvaluate}
+            negative={this.handleNegative}
           />
         </div>
       </div>
