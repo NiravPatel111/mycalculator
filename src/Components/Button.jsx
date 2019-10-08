@@ -12,9 +12,6 @@ class Button extends React.Component {
         >
           AC
         </button>
-        <button id='modulus' value='-' onClick={this.props.negative}>
-          +/-
-        </button>
         <button id='divide' value='/' onClick={this.props.operators}>
           /
         </button>

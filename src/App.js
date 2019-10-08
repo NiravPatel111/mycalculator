@@ -22,7 +22,6 @@ class App extends React.Component {
     this.handleOperators = this.handleOperators.bind(this);
     this.handleEvaluate = this.handleEvaluate.bind(this);
     this.handleDecimal = this.handleDecimal.bind(this);
-    this.handleNegative = this.handleNegative.bind(this);
   }
 
   initialize() {
@@ -80,19 +79,19 @@ class App extends React.Component {
   }
   // Negative
 
-  handleNegative(e) {
-    if (
-      endsWithOperator.test(this.state.currentVal) &&
-      !endsWithSubtract.test(this.state.currentVal)
-    ) {
-      this.setState({ currentVal: this.state.currentVal + e.target.value });
-    } else if (
-      endsWithDecimal.test(this.state.currentVal) ||
-      endsWithNum.test(this.state.currentVal)
-    ) {
-      this.setState({ currentVal: this.state.currentVal * -1 });
-    }
-  }
+  // handleNegative(e) {
+  //   if (
+  //     endsWithOperator.test(this.state.currentVal) &&
+  //     !endsWithSubtract.test(this.state.currentVal)
+  //   ) {
+  //     this.setState({ currentVal: this.state.currentVal + e.target.value });
+  //   } else if (
+  //     endsWithDecimal.test(this.state.currentVal) ||
+  //     endsWithNum.test(this.state.currentVal)
+  //   ) {
+  //     this.setState({ currentVal: this.state.currentVal * -1 });
+  //   }
+  // }
 
   handleDecimal() {
     if (this.state.evaluated === true || this.state.currentVal == '0') {
@@ -138,7 +137,6 @@ class App extends React.Component {
             operators={this.handleOperators}
             decimal={this.handleDecimal}
             evaluate={this.handleEvaluate}
-            negative={this.handleNegative}
           />
         </div>
       </div>
